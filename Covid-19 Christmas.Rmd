@@ -1,0 +1,77 @@
+---
+title: "A Covid-19 Christmas"
+author: "Rebecca Hadi"
+date: "10/10/2020"
+output: pdf_document
+---
+
+```{r, echo = FALSE}
+library(knitr)
+library(visualize)
+```
+
+
+# Findings & Recommendation 
+This analysis indicates that there is a $13\%$ chance that at least one person at the Christmas family gathering will be Covid-19 positive given that they tested negative. Attendance of the Christmas gathering depends upon your individual risk tolerance, which is likely influenced by your Covid-19 risk factors (e.g. age, co-morbidities). There is an $87\%$ chance that there will be no Covid-19 positive attendees given they all test negative. 
+
+# Motivation
+Covid-19 is a virus that affects roughly 1.92% of Washingtonians.  As the holidays are approaching, we want to understand the level of risk associated with large family gatherings to inform our holiday plans.
+
+# Data & Assumptions
+We use data from [Harvard Health Blog](https://www.health.harvard.edu/blog/which-test-is-best-for-covid-19-2020081020734) and the [Washington State Coronavius Response](https://coronavirus.wa.gov/?gclid=Cj0KCQjwt4X8BRCPARIsABmcnOovKwp91oUjYUhReBmTCG4YRV0SyKHnABrk2xPCSKIxriINDtxWQ0UaAobGEALw_wcB) to get the probabilities in the analysis below. Further, we assume: 
+
+*  All attendees of the Christmas Gathering had a rapid Covid-19 antibody test (herein referred to as "test") en route to the Christmas event and had no subsequent Covid-19 exposures. 
+* All attendees tested negative for Covid-19.
+* For simplicity, assume probability of each person having Covid-19 is independent. It is likely that individual family units being in close proximity are dependent and may increase the probability of Covid-19.
+* Assume probability of Covid-19 is equal across all families. It is likely that some families have higher exposure than others (e.g. those in the medical field or with kids in childcare) that would increase their probability of having Covid-19. 
+
+
+# Analysis
+Let:
+
+  * P(Has Covid-19) = 2% 
+  * P(No Covid-19) = 98% 
+  * P(Test Positive | Covid) = 80% (True Positive) 
+  * P(Test Negative | Covid) = 20% (False Negative) 
+  * P(Test Negative | No Covid) = 100% (Specificity)
+
+Using these probabilities, we want to calculate P(Covid | Test Negative). We need to use [Bayes' Theorem](https://en.wikipedia.org/wiki/Bayes%27_theorem) to find this conditional probability based on the information above. 
+
+$$P(Covid | Test Negative) =  \frac{P(Test Negtive | Has Covid) * P(Covid)}{P(Test Negative)}$$
+$$P(Covid | Test Negative) = \frac{20\% * 2\%}{P(Test Negative)}$$
+
+$$P(Test Negative) = P(Test Negative | Has Covid)* P(Has Covid) + P(Test Negative | No Covid) * P(No Covid)$$
+
+$$P(Test Negative) = (80\% * 2\%) + (100\%*98\%) = 99.6\%$$ 
+
+Going back to the first conditional probability, we now have: 
+
+$$P(Covid | Test Negative) = \frac{20\% * 2\%}{99.6\%} =  0.4\%$$
+
+We now have the conditional probability that we want to use to model the probability of at least 1 Covid positive person attending the family gathering, given everyone tested negative. To model this, we can use the binomial distribution where n = 35 (number of estimated attendees) and p = $0.4\%$ being the probability we just calculated and the previously mentioned assumed that each person is independent.  We will let X = # of covid positive given test negative people at the gathering. We want to find P(X=0), which means that no one will be covid positive given they test negative.  
+
+
+```{r}
+pbinom(0,size=35,prob=.004)
+```
+
+Therefore, there is an $87\%$ chance that everyone at Christmas will be covid negative given they tested negative.  This also means there is a $13\%$ chance that at least one person will be covid positive given that they tested negative. The probability distribution of Covid-19 positive family members who tested negative is below.
+
+
+```{r, echo = FALSE}
+x <- 0:35
+plot(x,dbinom(x,size=35,prob=.004),
+     main='Covid-19 Christmas Binomial Distribution (n=35, p=0.04)',
+     type = 'h',
+     ylab='Probability',
+     xlab ='# Covid Positive Given Tested Negative',
+     lwd=3)
+```
+
+
+
+
+
+
+
+
